@@ -53,20 +53,38 @@ for (let r = 8; r >= 1; r--) {
 export default function PlayinPersonPage2() {
   const game = useRef(new Chess());
   const [selectedSquare, setSelectedSquare] = useState(null);
+  const [lastMoveFromSquare, setLastMoveFromSquare] = useState(null);
   const [lastMoveSquare, setLastMoveSquare] = useState(null);
   const [legalMoves, setLegalMoves] = useState([]);
   const [positionMap, setPositionMap] = useState(getPositionMap(game.current.fen()));
 
   const handleSquareClick = (square) => {
+    // No piece selected yet
     if (!selectedSquare) {
       const moves = game.current.moves({ square, verbose: true });
       if (moves.length > 0) {
         setSelectedSquare(square);
-        setLegalMoves(moves.map((m) => m.to));
+        setLegalMoves(moves);
       }
       return;
     }
 
+    // Same square tapped again → deselect
+    if (square === selectedSquare) {
+      setSelectedSquare(null);
+      setLegalMoves([]);
+      return;
+    }
+
+    // Invalid square tapped → deselect
+    const isLegal = legalMoves.some((m) => m.to === square);
+    if (!isLegal) {
+      setSelectedSquare(null);
+      setLegalMoves([]);
+      return;
+    }
+
+    // Valid move → execute
     const move = game.current.move({
       from: selectedSquare,
       to: square,
@@ -74,19 +92,11 @@ export default function PlayinPersonPage2() {
     });
 
     if (move) {
+      setLastMoveFromSquare(selectedSquare);
       setLastMoveSquare(square);
       setSelectedSquare(null);
       setLegalMoves([]);
       setPositionMap(getPositionMap(game.current.fen()));
-    } else {
-      const moves = game.current.moves({ square, verbose: true });
-      if (moves.length > 0) {
-        setSelectedSquare(square);
-        setLegalMoves(moves.map((m) => m.to));
-      } else {
-        setSelectedSquare(null);
-        setLegalMoves([]);
-      }
     }
   };
 
@@ -116,14 +126,14 @@ export default function PlayinPersonPage2() {
         ))}
 
         {/* Highlights */}
-        {selectedSquare && (
+        {lastMoveFromSquare && (
           <View
             style={[
               styles.highlightSelected,
               {
                 width: squareSize,
                 height: squareSize,
-                ...getSquarePosition(selectedSquare),
+                ...getSquarePosition(lastMoveFromSquare),
               },
             ]}
           />
@@ -140,18 +150,43 @@ export default function PlayinPersonPage2() {
             ]}
           />
         )}
-        {legalMoves.map((square) => (
-  <View
-    key={`highlight-${square}`}
-    style={[
-      styles.highlightLegal,
-      {
-        top: getSquarePosition(square).top + (squareSize - 16) / 2,
-        left: getSquarePosition(square).left + (squareSize - 16) / 2,
-      },
-    ]}
-  />
-))}
+        {selectedSquare && (
+          <View
+            style={[
+              styles.highlightSelected,
+              {
+                width: squareSize,
+                height: squareSize,
+                ...getSquarePosition(selectedSquare),
+              },
+            ]}
+          />
+        )}
+        {legalMoves.map((moveObj) => {
+          const square = moveObj.to;
+          const isCapture = moveObj.flags.includes('c');
+          return (
+            <View
+              key={`highlight-${square}`}
+              style={[
+                isCapture
+                  ? {
+                      ...styles.hollowLegal,
+                      width: squareSize,
+                      height: squareSize,
+                      borderRadius: squareSize / 2,
+                      top: getSquarePosition(square).top,
+                      left: getSquarePosition(square).left,
+                    }
+                  : {
+                      ...styles.highlightLegal,
+                      top: getSquarePosition(square).top + (squareSize - 16) / 2,
+                      left: getSquarePosition(square).left + (squareSize - 16) / 2,
+                    },
+              ]}
+            />
+          );
+        })}
 
         {/* Touch Overlays */}
         {allSquares.map((square) => (

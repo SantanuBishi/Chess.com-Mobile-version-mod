@@ -53,5 +53,17 @@ highlightLegal: {
   width: 16,
   height: 16,
   borderRadius: 50,
+},
+
+hollowLegal: {
+  position: 'absolute',
+  width: 50,
+  height: 50,
+  borderRadius: 50,
+  borderWidth: 5,
+  borderColor: 'rgba(0, 0, 0, 0.3)',
+  backgroundColor: 'transparent',
+  zIndex: 1,
 }
+
 });
