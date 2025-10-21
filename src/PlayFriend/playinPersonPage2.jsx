@@ -1,10 +1,9 @@
 import React, { useState, useRef } from 'react';
-import { View, Image, TouchableOpacity } from 'react-native';
-import  {Chess}  from 'chess.js';
-import { Dimensions } from 'react-native';
-import styles from './friendStyles';
+import { View, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { Chess } from 'chess.js';
+import styles from './playinPersonPage2Styles';
 
-const boardSize = Dimensions.get('window').width - 32;
+const boardSize = Dimensions.get('window').width;
 const squareSize = boardSize / 8;
 
 const pieceMap = {
@@ -44,9 +43,17 @@ const getSquarePosition = (square) => {
   };
 };
 
-export default function PlayFriendPage3() {
+const allSquares = [];
+for (let r = 8; r >= 1; r--) {
+  for (let f = 0; f < 8; f++) {
+    allSquares.push(`${'abcdefgh'[f]}${r}`);
+  }
+}
+
+export default function PlayinPersonPage2() {
   const game = useRef(new Chess());
   const [selectedSquare, setSelectedSquare] = useState(null);
+  const [lastMoveSquare, setLastMoveSquare] = useState(null);
   const [legalMoves, setLegalMoves] = useState([]);
   const [positionMap, setPositionMap] = useState(getPositionMap(game.current.fen()));
 
@@ -67,6 +74,7 @@ export default function PlayFriendPage3() {
     });
 
     if (move) {
+      setLastMoveSquare(square);
       setSelectedSquare(null);
       setLegalMoves([]);
       setPositionMap(getPositionMap(game.current.fen()));
@@ -88,6 +96,7 @@ export default function PlayFriendPage3() {
         <Image
           source={require('../../assets/Chessboard.png')}
           style={[styles.board, { width: boardSize, height: boardSize }]}
+          pointerEvents="box-none"
         />
 
         {/* Pieces */}
@@ -119,22 +128,33 @@ export default function PlayFriendPage3() {
             ]}
           />
         )}
-        {legalMoves.map((square) => (
+        {lastMoveSquare && (
           <View
-            key={`highlight-${square}`}
             style={[
-              styles.highlightLegal,
+              styles.highlightSelected,
               {
                 width: squareSize,
                 height: squareSize,
-                ...getSquarePosition(square),
+                ...getSquarePosition(lastMoveSquare),
               },
             ]}
           />
-        ))}
+        )}
+        {legalMoves.map((square) => (
+  <View
+    key={`highlight-${square}`}
+    style={[
+      styles.highlightLegal,
+      {
+        top: getSquarePosition(square).top + (squareSize - 16) / 2,
+        left: getSquarePosition(square).left + (squareSize - 16) / 2,
+      },
+    ]}
+  />
+))}
 
         {/* Touch Overlays */}
-        {Object.keys(positionMap).map((square) => (
+        {allSquares.map((square) => (
           <TouchableOpacity
             key={`touch-${square}`}
             style={[

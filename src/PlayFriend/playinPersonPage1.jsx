@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import styles from './playFriendPage2Styles';
 
 
-export default function PlayFriendPage2() {
+export default function PlayinPersonPage1() {
   const navigation = useNavigation();
 
   const [whitePlayer, setWhitePlayer] = useState('Player-1');

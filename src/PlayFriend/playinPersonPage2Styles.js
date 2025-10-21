@@ -23,11 +23,7 @@ export default StyleSheet.create({
     zIndex: 3,
     backgroundColor: 'transparent',
   },
-  legalDot: {
-    position: 'absolute',
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
-    zIndex: 1,
-  },
+
   turnText: {
     color: '#ccc',
     fontSize: 16,
@@ -43,4 +39,19 @@ export default StyleSheet.create({
     fontSize: 14,
     marginBottom: 4,
   },
+  highlightSelected: {
+  position: 'absolute',
+  backgroundColor: 'rgba(255, 255, 0, 0.4)',
+  zIndex: 1,
+  borderRadius: 4,
+},
+
+highlightLegal: {
+  position: 'absolute',
+  backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  zIndex: 1,
+  width: 16,
+  height: 16,
+  borderRadius: 50,
+}
 });
