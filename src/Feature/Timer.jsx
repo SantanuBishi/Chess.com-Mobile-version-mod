@@ -30,8 +30,8 @@ export default function TimerBlock({
     transform: [
       {
         rotate: rotation.interpolate({
-          inputRange: [0, 1],
-          outputRange: ['0deg', '90deg'],
+          inputRange: [0, 1,],
+          outputRange: ['0deg', '360deg'],
         }),
       },
     ],
@@ -72,7 +72,9 @@ export default function TimerBlock({
       <Text style={[styles.timerText, { color: isWhite ? '#000' : '#fff' }]}>
         {timeText}
       </Text>
+      
     </View>
+    
   );
 }
 
@@ -81,8 +83,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 8,
     marginTop: 12,
     alignSelf: 'center',
