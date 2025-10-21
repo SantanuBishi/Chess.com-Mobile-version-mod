@@ -2,12 +2,12 @@
 import React, { useState } from 'react';
 import { View,  Text,  TextInput,  TouchableOpacity,  Switch,  StyleSheet,  ScrollView,} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import styles from './playFriendPage2Styles';
+import styles from './playinPersonPage1Styles';
 
 
 export default function PlayinPersonPage1() {
   const navigation = useNavigation();
-
+  
   const [whitePlayer, setWhitePlayer] = useState('Player-1');
   const [blackPlayer, setBlackPlayer] = useState('Player-2');
   const [timeControl, setTimeControl] = useState('None');
@@ -21,9 +21,9 @@ export default function PlayinPersonPage1() {
       rotateBoard,
     });
 
-    navigation.navigate('playFriendPage3', {
-      whitePlayer,
-      blackPlayer,
+    navigation.navigate('playinPersonPage2', {
+      whitePlayer : whitePlayer,
+      blackPlayer : blackPlayer,
       timeControl,
       rotateBoard,
       startTimer: true,

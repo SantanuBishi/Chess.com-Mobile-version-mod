@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { View, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Image, TouchableOpacity, Dimensions, Text, ScrollView } from 'react-native';
+import { useRoute } from '@react-navigation/native';
 import { Chess } from 'chess.js';
 import styles from './playinPersonPage2Styles';
 
@@ -51,15 +52,18 @@ for (let r = 8; r >= 1; r--) {
 }
 
 export default function PlayinPersonPage2() {
+  const route = useRoute();
+  const { whitePlayer = 'White', blackPlayer = 'Black' } = route.params || {};
+
   const game = useRef(new Chess());
   const [selectedSquare, setSelectedSquare] = useState(null);
   const [lastMoveFromSquare, setLastMoveFromSquare] = useState(null);
   const [lastMoveSquare, setLastMoveSquare] = useState(null);
   const [legalMoves, setLegalMoves] = useState([]);
   const [positionMap, setPositionMap] = useState(getPositionMap(game.current.fen()));
+  const [moveHistory, setMoveHistory] = useState([]);
 
   const handleSquareClick = (square) => {
-    // No piece selected yet
     if (!selectedSquare) {
       const moves = game.current.moves({ square, verbose: true });
       if (moves.length > 0) {
@@ -69,14 +73,12 @@ export default function PlayinPersonPage2() {
       return;
     }
 
-    // Same square tapped again → deselect
     if (square === selectedSquare) {
       setSelectedSquare(null);
       setLegalMoves([]);
       return;
     }
 
-    // Invalid square tapped → deselect
     const isLegal = legalMoves.some((m) => m.to === square);
     if (!isLegal) {
       setSelectedSquare(null);
@@ -84,7 +86,6 @@ export default function PlayinPersonPage2() {
       return;
     }
 
-    // Valid move → execute
     const move = game.current.move({
       from: selectedSquare,
       to: square,
@@ -97,112 +98,149 @@ export default function PlayinPersonPage2() {
       setSelectedSquare(null);
       setLegalMoves([]);
       setPositionMap(getPositionMap(game.current.fen()));
+      setMoveHistory((prev) => [...prev, move.san]);
     }
   };
 
   return (
     <View style={styles.container}>
-      <View style={[styles.boardWrapper, { width: boardSize, height: boardSize }]}>
-        <Image
-          source={require('../../assets/Chessboard.png')}
-          style={[styles.board, { width: boardSize, height: boardSize }]}
-          pointerEvents="box-none"
-        />
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.modeLabel}>👥 Play in Person</Text>
+        <Text style={styles.turnIndicator}>
+          {game.current.turn() === 'w' ? `${whitePlayer} to move` : `${blackPlayer} to move`}
+        </Text>
+        <ScrollView horizontal style={styles.moveScroll} contentContainerStyle={styles.moveScrollContent}>
+          {moveHistory.map((move, idx) => (
+            <Text key={`move-${idx}`} style={styles.moveItem}>
+              {idx + 1}. {move}
+            </Text>
+          ))}
+        </ScrollView>
+      </View>
 
-        {/* Pieces */}
-        {Object.entries(positionMap).map(([square, piece]) => (
+      {/* Vertically Centered Block */}
+      <View style={styles.centerBlock}>
+        {/* Black Player Label */}
+        <View style={styles.playerRow}>
+          <View style={styles.playerBlock}>
+            <Image source={require('../../assets/bK.png')} style={styles.playerIcon} />
+            <Text style={styles.playerLabel}>{blackPlayer}</Text>
+          </View>
+        </View>
+
+        {/* Board */}
+        <View style={[styles.boardWrapper, { width: boardSize, height: boardSize }]}>
           <Image
-            key={square}
-            source={pieceMap[piece]}
-            style={[
-              styles.piece,
-              {
-                width: squareSize,
-                height: squareSize,
-                ...getSquarePosition(square),
-              },
-            ]}
+            source={require('../../assets/Chessboard.png')}
+            style={[styles.board, { width: boardSize, height: boardSize }]}
+            pointerEvents="box-none"
           />
-        ))}
 
-        {/* Highlights */}
-        {lastMoveFromSquare && (
-          <View
-            style={[
-              styles.highlightSelected,
-              {
-                width: squareSize,
-                height: squareSize,
-                ...getSquarePosition(lastMoveFromSquare),
-              },
-            ]}
-          />
-        )}
-        {lastMoveSquare && (
-          <View
-            style={[
-              styles.highlightSelected,
-              {
-                width: squareSize,
-                height: squareSize,
-                ...getSquarePosition(lastMoveSquare),
-              },
-            ]}
-          />
-        )}
-        {selectedSquare && (
-          <View
-            style={[
-              styles.highlightSelected,
-              {
-                width: squareSize,
-                height: squareSize,
-                ...getSquarePosition(selectedSquare),
-              },
-            ]}
-          />
-        )}
-        {legalMoves.map((moveObj) => {
-          const square = moveObj.to;
-          const isCapture = moveObj.flags.includes('c');
-          return (
-            <View
-              key={`highlight-${square}`}
+          {/* Pieces */}
+          {Object.entries(positionMap).map(([square, piece]) => (
+            <Image
+              key={square}
+              source={pieceMap[piece]}
               style={[
-                isCapture
-                  ? {
-                      ...styles.hollowLegal,
-                      width: squareSize,
-                      height: squareSize,
-                      borderRadius: squareSize / 2,
-                      top: getSquarePosition(square).top,
-                      left: getSquarePosition(square).left,
-                    }
-                  : {
-                      ...styles.highlightLegal,
-                      top: getSquarePosition(square).top + (squareSize - 16) / 2,
-                      left: getSquarePosition(square).left + (squareSize - 16) / 2,
-                    },
+                styles.piece,
+                {
+                  width: squareSize,
+                  height: squareSize,
+                  ...getSquarePosition(square),
+                },
               ]}
             />
-          );
-        })}
+          ))}
 
-        {/* Touch Overlays */}
-        {allSquares.map((square) => (
-          <TouchableOpacity
-            key={`touch-${square}`}
-            style={[
-              styles.square,
-              {
-                width: squareSize,
-                height: squareSize,
-                ...getSquarePosition(square),
-              },
-            ]}
-            onPress={() => handleSquareClick(square)}
-          />
-        ))}
+          {/* Highlights */}
+          {lastMoveFromSquare && (
+            <View
+              style={[
+                styles.highlightSelected,
+                {
+                  width: squareSize,
+                  height: squareSize,
+                  ...getSquarePosition(lastMoveFromSquare),
+                },
+              ]}
+            />
+          )}
+          {lastMoveSquare && (
+            <View
+              style={[
+                styles.highlightSelected,
+                {
+                  width: squareSize,
+                  height: squareSize,
+                  ...getSquarePosition(lastMoveSquare),
+                },
+              ]}
+            />
+          )}
+          {selectedSquare && (
+            <View
+              style={[
+                styles.highlightSelected,
+                {
+                  width: squareSize,
+                  height: squareSize,
+                  ...getSquarePosition(selectedSquare),
+                },
+              ]}
+            />
+          )}
+          {legalMoves.map((moveObj) => {
+            const square = moveObj.to;
+            const isCapture = moveObj.flags.includes('c') || moveObj.flags.includes('e');
+
+            return (
+              <View
+                key={`highlight-${square}`}
+                style={[
+                  isCapture
+                    ? {
+                        ...styles.hollowLegal,
+                        width: squareSize,
+                        height: squareSize,
+                        borderRadius: squareSize / 2,
+                        top: getSquarePosition(square).top,
+                        left: getSquarePosition(square).left,
+                      }
+                    : {
+                        ...styles.highlightLegal,
+                        top: getSquarePosition(square).top + (squareSize - 20) / 2,
+                        left: getSquarePosition(square).left + (squareSize - 20) / 2,
+                      },
+                ]}
+              />
+            );
+          })}
+
+          {/* Touch Overlays */}
+          {allSquares.map((square) => (
+            <TouchableOpacity
+              key={`touch-${square}`}
+              style={[
+                styles.square,
+                {
+                  width: squareSize,
+                  height: squareSize,
+                  ...getSquarePosition(square),
+                },
+              ]}
+              onPress={() => handleSquareClick(square)}
+            />
+          ))}
+        </View>
+
+        {/* White Player Label */}
+        <View style={styles.playerRow}>
+          <View style={styles.playerBlock}>
+            <Image source={require('../../assets/wK.png')} style={styles.playerIcon} />
+            <Text style={styles.playerLabel}>{whitePlayer}</Text>
+          </View>
+        </View>
       </View>
     </View>
   );

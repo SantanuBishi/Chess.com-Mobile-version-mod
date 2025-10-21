@@ -16,7 +16,7 @@ export default function PlayFriendPage1() {
       {/* Option 1: Play in Person */}
       <TouchableOpacity
         style={styles.optionCard}
-        onPress={() => navigation.navigate('playFriendPage2')}
+        onPress={() => navigation.navigate('playinPersonPage1')}
       >
         <Text style={styles.icon}>👥</Text>
         <Text style={styles.label}>Play in Person</Text>
