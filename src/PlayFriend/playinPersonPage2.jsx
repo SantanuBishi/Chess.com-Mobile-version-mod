@@ -107,9 +107,6 @@ export default function PlayinPersonPage2() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.modeLabel}>👥 Play in Person</Text>
-        <Text style={styles.turnIndicator}>
-          {game.current.turn() === 'w' ? `${whitePlayer} to move` : `${blackPlayer} to move`}
-        </Text>
         <ScrollView horizontal style={styles.moveScroll} contentContainerStyle={styles.moveScrollContent}>
           {moveHistory.map((move, idx) => (
             <Text key={`move-${idx}`} style={styles.moveItem}>
