@@ -164,12 +164,13 @@ export default function PlayinPersonPage2() {
   {timeControl > 0 && (
     <View style={styles.timerRight}>
       <TimerBlock
-        activeColor="b"
+        mode="b"
+        activeColor={activeColor}
         whiteTime={whiteTime}
         blackTime={blackTime}
         isRunning={isRunning && activeColor === 'b'}
         timeControl={timeControl}
-      />
+        />
     </View>
   )}
 </View>
@@ -263,12 +264,13 @@ export default function PlayinPersonPage2() {
   {timeControl > 0 && (
     <View style={styles.timerRight}>
       <TimerBlock
-        activeColor="w"
-        whiteTime={whiteTime}
-        blackTime={blackTime}
-        isRunning={isRunning && activeColor === 'w'}
-        timeControl={timeControl}
-      />
+  mode="w"
+  activeColor={activeColor}
+  whiteTime={whiteTime}
+  blackTime={blackTime}
+  isRunning={isRunning && activeColor === 'w'}
+  timeControl={timeControl}
+/>
     </View>
   )}
 </View>
