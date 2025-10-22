@@ -3,7 +3,7 @@ import { View, Image, TouchableOpacity, Dimensions, Text, ScrollView } from 'rea
 import { useRoute } from '@react-navigation/native';
 import { Chess } from 'chess.js';
 import styles from './playinPersonPage2Styles';
-import { TimerBlock,LegalDot } from '../Feature';
+import { TimerBlock,LegalDot,LastMoveHighlight } from '../Feature';
 
 
 
@@ -199,36 +199,27 @@ export default function PlayinPersonPage2() {
             />
           ))}
 
-          {[lastMoveFromSquare, lastMoveSquare, selectedSquare].map(
-            (square, i) =>
-              square && (
-                <View
-                  key={`highlight-${i}`}
-                  style={[
-                    styles.highlightSelected,
-                    {
-                      width: squareSize,
-                      height: squareSize,
-                      ...getSquarePosition(square),
-                    },
-                  ]}
-                />
-              )
-          )}
-                <LegalDot legalMoves={legalMoves} squareSize={squareSize} />
           
-                    {allSquares.map((square) => (
-            <TouchableOpacity
-              key={`touch-${square}`}
-              style={[
-                styles.square,
-                {
-                  width: squareSize,
-                  height: squareSize,
-                  ...getSquarePosition(square),
-                },
-              ]}
-              onPress={() => handleSquareClick(square)}
+<LastMoveHighlight
+  squares={[lastMoveFromSquare, lastMoveSquare, selectedSquare]}
+  squareSize={squareSize}
+  getSquarePosition={getSquarePosition}
+/>
+
+<LegalDot legalMoves={legalMoves} squareSize={squareSize} />
+          
+  {allSquares.map((square) => (
+  <TouchableOpacity
+  key={`touch-${square}`}
+  style={[
+  styles.square,
+  {
+    width: squareSize,
+    height: squareSize,
+    ...getSquarePosition(square),
+   },
+         ]}
+             onPress={() => handleSquareClick(square)}
             />
           ))}
         </View>

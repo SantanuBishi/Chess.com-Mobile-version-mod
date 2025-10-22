@@ -112,22 +112,6 @@ export default StyleSheet.create({
     borderRadius: 4,
   },
 
-  highlightLegal: {
-    position: 'absolute',
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    width: 20,
-    height: 20,
-    borderRadius: 50,
-    zIndex: 10,
-  },
-
-  hollowLegal: {
-    position: 'absolute',
-    borderWidth: 4,
-    borderColor: 'rgba(0, 0, 0, 0.15)',
-    backgroundColor: 'transparent',
-    zIndex: 10,
-  },
   timerControls: {
   flexDirection: 'row',
   justifyContent: 'center',
