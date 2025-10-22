@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Image, TouchableOpacity, Dimensions, Text, ScrollView } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { Chess } from 'chess.js';
 import styles from './playinPersonPage2Styles';
+import { TimerBlock } from '../Feature';
 
 const boardSize = Dimensions.get('window').width;
 const squareSize = boardSize / 8;
@@ -53,7 +54,12 @@ for (let r = 8; r >= 1; r--) {
 
 export default function PlayinPersonPage2() {
   const route = useRoute();
-  const { whitePlayer = 'White', blackPlayer = 'Black' } = route.params || {};
+  const {
+    whitePlayer = 'White',
+    blackPlayer = 'Black',
+    timeControl = 0,
+    startTimer = false,
+  } = route.params || {};
 
   const game = useRef(new Chess());
   const [selectedSquare, setSelectedSquare] = useState(null);
@@ -62,6 +68,39 @@ export default function PlayinPersonPage2() {
   const [legalMoves, setLegalMoves] = useState([]);
   const [positionMap, setPositionMap] = useState(getPositionMap(game.current.fen()));
   const [moveHistory, setMoveHistory] = useState([]);
+
+  const [whiteTime, setWhiteTime] = useState(timeControl);
+  const [blackTime, setBlackTime] = useState(timeControl);
+  const [activeColor, setActiveColor] = useState('w');
+  const [isRunning, setIsRunning] = useState(startTimer);
+
+  useEffect(() => {
+    if (!isRunning || timeControl === 0) return;
+
+    const interval = setInterval(() => {
+      if (activeColor === 'w') {
+        setWhiteTime((prev) => {
+          if (prev <= 1) {
+            setIsRunning(false);
+            alert(`${whitePlayer} lost on time`);
+            return 0;
+          }
+          return prev - 1;
+        });
+      } else {
+        setBlackTime((prev) => {
+          if (prev <= 1) {
+            setIsRunning(false);
+            alert(`${blackPlayer} lost on time`);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isRunning, activeColor]);
 
   const handleSquareClick = (square) => {
     if (!selectedSquare) {
@@ -99,17 +138,14 @@ export default function PlayinPersonPage2() {
       setLegalMoves([]);
       setPositionMap(getPositionMap(game.current.fen()));
       setMoveHistory((prev) => [...prev, move.san]);
+      setActiveColor(game.current.turn());
     }
   };
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.modeLabel}>👥 Play in Person</Text>
-        <Text style={styles.turnIndicator}>
-          {game.current.turn() === 'w' ? `${whitePlayer} to move` : `${blackPlayer} to move`}
-        </Text>
         <ScrollView horizontal style={styles.moveScroll} contentContainerStyle={styles.moveScrollContent}>
           {moveHistory.map((move, idx) => (
             <Text key={`move-${idx}`} style={styles.moveItem}>
@@ -119,17 +155,26 @@ export default function PlayinPersonPage2() {
         </ScrollView>
       </View>
 
-      {/* Vertically Centered Block */}
       <View style={styles.centerBlock}>
-        {/* Black Player Label */}
-        <View style={styles.playerRow}>
-          <View style={styles.playerBlock}>
-            <Image source={require('../../assets/bK.png')} style={styles.playerIcon} />
-            <Text style={styles.playerLabel}>{blackPlayer}</Text>
-          </View>
-        </View>
+       <View style={styles.playerRow}>
+  <View style={styles.playerBlock}>
+    <Image source={require('../../assets/bK.png')} style={styles.playerIcon} />
+    <Text style={styles.playerLabel}>{blackPlayer}</Text>
+  </View>
+  {timeControl > 0 && (
+    <View style={styles.timerRight}>
+      <TimerBlock
+        mode="b"
+        activeColor={activeColor}
+        whiteTime={whiteTime}
+        blackTime={blackTime}
+        isRunning={isRunning && activeColor === 'b'}
+        timeControl={timeControl}
+        />
+    </View>
+  )}
+</View>
 
-        {/* Board */}
         <View style={[styles.boardWrapper, { width: boardSize, height: boardSize }]}>
           <Image
             source={require('../../assets/Chessboard.png')}
@@ -137,7 +182,6 @@ export default function PlayinPersonPage2() {
             pointerEvents="box-none"
           />
 
-          {/* Pieces */}
           {Object.entries(positionMap).map(([square, piece]) => (
             <Image
               key={square}
@@ -153,47 +197,26 @@ export default function PlayinPersonPage2() {
             />
           ))}
 
-          {/* Highlights */}
-          {lastMoveFromSquare && (
-            <View
-              style={[
-                styles.highlightSelected,
-                {
-                  width: squareSize,
-                  height: squareSize,
-                  ...getSquarePosition(lastMoveFromSquare),
-                },
-              ]}
-            />
+          {[lastMoveFromSquare, lastMoveSquare, selectedSquare].map(
+            (square, i) =>
+              square && (
+                <View
+                  key={`highlight-${i}`}
+                  style={[
+                    styles.highlightSelected,
+                    {
+                      width: squareSize,
+                      height: squareSize,
+                      ...getSquarePosition(square),
+                    },
+                  ]}
+                />
+              )
           )}
-          {lastMoveSquare && (
-            <View
-              style={[
-                styles.highlightSelected,
-                {
-                  width: squareSize,
-                  height: squareSize,
-                  ...getSquarePosition(lastMoveSquare),
-                },
-              ]}
-            />
-          )}
-          {selectedSquare && (
-            <View
-              style={[
-                styles.highlightSelected,
-                {
-                  width: squareSize,
-                  height: squareSize,
-                  ...getSquarePosition(selectedSquare),
-                },
-              ]}
-            />
-          )}
+
           {legalMoves.map((moveObj) => {
             const square = moveObj.to;
             const isCapture = moveObj.flags.includes('c') || moveObj.flags.includes('e');
-
             return (
               <View
                 key={`highlight-${square}`}
@@ -217,7 +240,6 @@ export default function PlayinPersonPage2() {
             );
           })}
 
-          {/* Touch Overlays */}
           {allSquares.map((square) => (
             <TouchableOpacity
               key={`touch-${square}`}
@@ -234,14 +256,37 @@ export default function PlayinPersonPage2() {
           ))}
         </View>
 
-        {/* White Player Label */}
         <View style={styles.playerRow}>
-          <View style={styles.playerBlock}>
-            <Image source={require('../../assets/wK.png')} style={styles.playerIcon} />
-            <Text style={styles.playerLabel}>{whitePlayer}</Text>
-          </View>
-        </View>
+  <View style={styles.playerBlock}>
+    <Image source={require('../../assets/wK.png')} style={styles.playerIcon} />
+    <Text style={styles.playerLabel}>{whitePlayer}</Text>
+  </View>
+  {timeControl > 0 && (
+    <View style={styles.timerRight}>
+      <TimerBlock
+  mode="w"
+  activeColor={activeColor}
+  whiteTime={whiteTime}
+  blackTime={blackTime}
+  isRunning={isRunning && activeColor === 'w'}
+  timeControl={timeControl}
+/>
+    </View>
+  )}
+</View>
+
+        {timeControl > 0 && (
+          <View style={styles.timerControls}>
+            <TouchableOpacity onPress={() => setIsRunning(true)} style={styles.controlButton}>
+              <Text style={styles.controlText}>Start</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setIsRunning(false)} style={styles.controlButton}>
+              <Text style={styles.controlText}>Stop</Text>
+            </TouchableOpacity>
+                    </View>
+        )}
       </View>
     </View>
   );
 }
+       

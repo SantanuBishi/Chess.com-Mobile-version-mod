@@ -5,7 +5,7 @@ const boardSize = Dimensions.get('window').width;
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#121212',
     paddingTop: 50,
     paddingBottom: 80,
   },
@@ -59,12 +59,12 @@ export default StyleSheet.create({
   },
 
   playerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingLeft: 20,
-    marginVertical: 8,
-  },
+     flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  paddingHorizontal: 16,
+  marginVertical: 4,
+},
 
   playerBlock: {
     flexDirection: 'row',
@@ -128,4 +128,20 @@ export default StyleSheet.create({
     backgroundColor: 'transparent',
     zIndex: 10,
   },
+  timerControls: {
+  flexDirection: 'row',
+  justifyContent: 'center',
+  marginTop: 12,
+},
+controlButton: {
+  backgroundColor: '#444',
+  paddingHorizontal: 16,
+  paddingVertical: 8,
+  borderRadius: 6,
+  marginHorizontal: 8,
+},
+controlText: {
+  color: '#fff',
+  fontWeight: '600',
+},
 });
