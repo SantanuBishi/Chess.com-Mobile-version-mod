@@ -3,7 +3,9 @@ import { View, Image, TouchableOpacity, Dimensions, Text, ScrollView } from 'rea
 import { useRoute } from '@react-navigation/native';
 import { Chess } from 'chess.js';
 import styles from './playinPersonPage2Styles';
-import { TimerBlock } from '../Feature';
+import { TimerBlock,LegalDot } from '../Feature';
+
+
 
 const boardSize = Dimensions.get('window').width;
 const squareSize = boardSize / 8;
@@ -213,34 +215,9 @@ export default function PlayinPersonPage2() {
                 />
               )
           )}
-
-          {legalMoves.map((moveObj) => {
-            const square = moveObj.to;
-            const isCapture = moveObj.flags.includes('c') || moveObj.flags.includes('e');
-            return (
-              <View
-                key={`highlight-${square}`}
-                style={[
-                  isCapture
-                    ? {
-                        ...styles.hollowLegal,
-                        width: squareSize,
-                        height: squareSize,
-                        borderRadius: squareSize / 2,
-                        top: getSquarePosition(square).top,
-                        left: getSquarePosition(square).left,
-                      }
-                    : {
-                        ...styles.highlightLegal,
-                        top: getSquarePosition(square).top + (squareSize - 20) / 2,
-                        left: getSquarePosition(square).left + (squareSize - 20) / 2,
-                      },
-                ]}
-              />
-            );
-          })}
-
-          {allSquares.map((square) => (
+                <LegalDot legalMoves={legalMoves} squareSize={squareSize} />
+          
+                    {allSquares.map((square) => (
             <TouchableOpacity
               key={`touch-${square}`}
               style={[
