@@ -9,7 +9,6 @@ export default function MoveHistoryPanel({
   setPositionMap,
   setActiveColor,
   getPositionMap,
-  rollbackIndex,
   setRollbackIndex,
   game,
   setHighlightSquares,
@@ -53,7 +52,7 @@ export default function MoveHistoryPanel({
       lastMove = move;
     }
 
-    game.current = tempGame; // ✅ CRITICAL FIX
+    game.current = tempGame;
 
     setMoveIndex(index);
     setRollbackIndex(index);

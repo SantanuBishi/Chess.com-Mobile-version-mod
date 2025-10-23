@@ -82,35 +82,7 @@ export default StyleSheet.create({
     fontWeight: '500',
     color: '#eee',
   },
-
-  boardWrapper: {
-    position: 'relative',
-    marginVertical: 8,
-    alignSelf: 'center',
-  },
-
-  board: {
-    position: 'absolute',
-    resizeMode: 'contain',
-  },
-
-  piece: {
-    position: 'absolute',
-    zIndex: 5,
-  },
-
-  square: {
-    position: 'absolute',
-    zIndex: 10,
-    backgroundColor: 'transparent',
-  },
-
-  highlightSelected: {
-    position: 'absolute',
-    backgroundColor: 'rgba(255, 255, 0, 0.4)',
-    zIndex: 4,
-    borderRadius: 4,
-  },
+  
 
   timerControls: {
   flexDirection: 'row',

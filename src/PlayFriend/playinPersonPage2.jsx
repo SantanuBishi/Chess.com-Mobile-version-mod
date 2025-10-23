@@ -1,19 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Image, TouchableOpacity, Dimensions, Text, ScrollView } from 'react-native';
+import { View, Image, Text, TouchableOpacity, Dimensions } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { Chess } from 'chess.js';
 import styles from './playinPersonPage2Styles';
-import { TimerBlock, LegalDot, LastMoveHighlight,MoveHistoryPanel } from '../Feature';
+import { TimerBlock, MoveHistoryPanel } from '../Feature';
+import ChessBoard from '../Chessboard/Chessboard';
 
 const boardSize = Dimensions.get('window').width;
-const squareSize = boardSize / 8;
-
-const pieceMap = {
-  K: require('../../assets/wK.png'), Q: require('../../assets/wQ.png'), R: require('../../assets/wR.png'),
-  B: require('../../assets/wB.png'), N: require('../../assets/wN.png'), P: require('../../assets/wP.png'),
-  k: require('../../assets/bK.png'), q: require('../../assets/bQ.png'), r: require('../../assets/bR.png'),
-  b: require('../../assets/bB.png'), n: require('../../assets/bN.png'), p: require('../../assets/bP.png'),
-};
 
 const getPositionMap = (fen) => {
   const rows = fen.split(' ')[0].split('/');
@@ -32,25 +25,6 @@ const getPositionMap = (fen) => {
   });
   return position;
 };
-
-const getSquarePosition = (square) => {
-  const files = 'abcdefgh';
-  const rank = parseInt(square[1], 10);
-  const file = files.indexOf(square[0]);
-  const row = 8 - rank;
-  const col = file;
-  return {
-    top: row * squareSize,
-    left: col * squareSize,
-  };
-};
-
-const allSquares = [];
-for (let r = 8; r >= 1; r--) {
-  for (let f = 0; f < 8; f++) {
-    allSquares.push(`${'abcdefgh'[f]}${r}`);
-  }
-}
 
 export default function PlayinPersonPage2() {
   const route = useRoute();
@@ -154,16 +128,16 @@ export default function PlayinPersonPage2() {
       <View style={styles.header}>
         <Text style={styles.modeLabel}>👥 Play in Person</Text>
         <MoveHistoryPanel
-  moveHistory={moveHistory}
-  moveIndex={moveIndex}
-  setMoveIndex={setMoveIndex}
-  setRollbackIndex={setRollbackIndex}
-  setPositionMap={setPositionMap}
-  setActiveColor={setActiveColor}
-  getPositionMap={getPositionMap}
-  game={game}
-  setHighlightSquares={setHighlightSquares}
-/>
+          moveHistory={moveHistory}
+          moveIndex={moveIndex}
+          setMoveIndex={setMoveIndex}
+          setRollbackIndex={setRollbackIndex}
+          setPositionMap={setPositionMap}
+          setActiveColor={setActiveColor}
+          getPositionMap={getPositionMap}
+          game={game}
+          setHighlightSquares={setHighlightSquares}
+        />
       </View>
 
       <View style={styles.centerBlock}>
@@ -186,51 +160,12 @@ export default function PlayinPersonPage2() {
           )}
         </View>
 
-        <View style={[styles.boardWrapper, { width: boardSize, height: boardSize }]}>
-          <Image
-            source={require('../../assets/Chessboard.png')}
-            style={[styles.board, { width: boardSize, height: boardSize }]}
-            pointerEvents="box-none"
-          />
-
-          {Object.entries(positionMap).map(([square, piece]) => (
-            <Image
-              key={square}
-              source={pieceMap[piece]}
-              style={[
-                styles.piece,
-                {
-                  width: squareSize,
-                  height: squareSize,
-                  ...getSquarePosition(square),
-                },
-              ]}
-            />
-          ))}
-
-          <LastMoveHighlight
-            squares={[highlightSquares?.from, highlightSquares?.to]}
-            squareSize={squareSize}
-            getSquarePosition={getSquarePosition}
-          />
-
-          <LegalDot legalMoves={legalMoves} squareSize={squareSize} />
-
-          {allSquares.map((square) => (
-            <TouchableOpacity
-              key={`touch-${square}`}
-              style={[
-                styles.square,
-                {
-                  width: squareSize,
-                  height: squareSize,
-                  ...getSquarePosition(square),
-                },
-              ]}
-              onPress={() => handleSquareClick(square)}
-            />
-          ))}
-        </View>
+        <ChessBoard
+          positionMap={positionMap}
+          legalMoves={legalMoves}
+          highlightSquares={highlightSquares}
+          onSquarePress={handleSquareClick}
+        />
 
         <View style={styles.playerRow}>
           <View style={styles.playerBlock}>
