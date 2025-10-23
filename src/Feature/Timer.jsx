@@ -64,11 +64,11 @@ export default function TimerBlock({
 
   const bgColor = isActive
     ? isWhite ? '#fff' : '#000'
-    : isWhite ? '#eee' : '#444';
+    : isWhite ? '#444' : '#444';
 
   const textColor = isActive
     ? isWhite ? '#000' : '#fff'
-    : isWhite ? '#888' : '#ccc';
+    : isWhite ? '#888' : '#888';
 
   let iconSource = null;
   try {
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 8,
+    borderRadius: 9,
     marginTop: 12,
     alignSelf: 'center',
   },
