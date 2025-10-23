@@ -4,7 +4,7 @@ import React from 'react';
 import { View, Image, TouchableOpacity, Dimensions } from 'react-native';
 import LegalDot from '../Feature/LegalDot';
 import LastMoveHighlight from '../Feature/HighlightMove';
-import styles from './ChessboardStyles'; // Create this file next
+import styles from './ChessboardStyles';
 
 const boardSize = Dimensions.get('window').width;
 const squareSize = boardSize / 8;
