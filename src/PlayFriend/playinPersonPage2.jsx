@@ -3,9 +3,7 @@ import { View, Image, TouchableOpacity, Dimensions, Text, ScrollView } from 'rea
 import { useRoute } from '@react-navigation/native';
 import { Chess } from 'chess.js';
 import styles from './playinPersonPage2Styles';
-import { TimerBlock,LegalDot,LastMoveHighlight } from '../Feature';
-
-
+import { TimerBlock, LegalDot, LastMoveHighlight,MoveHistoryPanel } from '../Feature';
 
 const boardSize = Dimensions.get('window').width;
 const squareSize = boardSize / 8;
@@ -65,11 +63,12 @@ export default function PlayinPersonPage2() {
 
   const game = useRef(new Chess());
   const [selectedSquare, setSelectedSquare] = useState(null);
-  const [lastMoveFromSquare, setLastMoveFromSquare] = useState(null);
-  const [lastMoveSquare, setLastMoveSquare] = useState(null);
   const [legalMoves, setLegalMoves] = useState([]);
   const [positionMap, setPositionMap] = useState(getPositionMap(game.current.fen()));
   const [moveHistory, setMoveHistory] = useState([]);
+  const [moveIndex, setMoveIndex] = useState(-1);
+  const [rollbackIndex, setRollbackIndex] = useState(0);
+  const [highlightSquares, setHighlightSquares] = useState(null);
 
   const [whiteTime, setWhiteTime] = useState(timeControl);
   const [blackTime, setBlackTime] = useState(timeControl);
@@ -134,13 +133,19 @@ export default function PlayinPersonPage2() {
     });
 
     if (move) {
-      setLastMoveFromSquare(selectedSquare);
-      setLastMoveSquare(square);
       setSelectedSquare(null);
       setLegalMoves([]);
       setPositionMap(getPositionMap(game.current.fen()));
-      setMoveHistory((prev) => [...prev, move.san]);
+      setMoveHistory((prev) => [...prev.slice(0, rollbackIndex), move.san]);
+      setMoveIndex(rollbackIndex);
+      setRollbackIndex(rollbackIndex + 1);
       setActiveColor(game.current.turn());
+
+      setHighlightSquares({
+        from: move.from,
+        to: move.to,
+        capture: move.flags.includes('c') ? move.to : null,
+      });
     }
   };
 
@@ -148,34 +153,38 @@ export default function PlayinPersonPage2() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.modeLabel}>👥 Play in Person</Text>
-        <ScrollView horizontal style={styles.moveScroll} contentContainerStyle={styles.moveScrollContent}>
-          {moveHistory.map((move, idx) => (
-            <Text key={`move-${idx}`} style={styles.moveItem}>
-              {idx + 1}. {move}
-            </Text>
-          ))}
-        </ScrollView>
+        <MoveHistoryPanel
+  moveHistory={moveHistory}
+  moveIndex={moveIndex}
+  setMoveIndex={setMoveIndex}
+  setRollbackIndex={setRollbackIndex}
+  setPositionMap={setPositionMap}
+  setActiveColor={setActiveColor}
+  getPositionMap={getPositionMap}
+  game={game}
+  setHighlightSquares={setHighlightSquares}
+/>
       </View>
 
       <View style={styles.centerBlock}>
-       <View style={styles.playerRow}>
-  <View style={styles.playerBlock}>
-    <Image source={require('../../assets/bK.png')} style={styles.playerIcon} />
-    <Text style={styles.playerLabel}>{blackPlayer}</Text>
-  </View>
-  {timeControl > 0 && (
-    <View style={styles.timerRight}>
-      <TimerBlock
-        mode="b"
-        activeColor={activeColor}
-        whiteTime={whiteTime}
-        blackTime={blackTime}
-        isRunning={isRunning && activeColor === 'b'}
-        timeControl={timeControl}
-        />
-    </View>
-  )}
-</View>
+        <View style={styles.playerRow}>
+          <View style={styles.playerBlock}>
+            <Image source={require('../../assets/bK.png')} style={styles.playerIcon} />
+            <Text style={styles.playerLabel}>{blackPlayer}</Text>
+          </View>
+          {timeControl > 0 && (
+            <View style={styles.timerRight}>
+              <TimerBlock
+                mode="b"
+                activeColor={activeColor}
+                whiteTime={whiteTime}
+                blackTime={blackTime}
+                isRunning={isRunning && activeColor === 'b'}
+                timeControl={timeControl}
+              />
+            </View>
+          )}
+        </View>
 
         <View style={[styles.boardWrapper, { width: boardSize, height: boardSize }]}>
           <Image
@@ -199,49 +208,48 @@ export default function PlayinPersonPage2() {
             />
           ))}
 
-          
-<LastMoveHighlight
-  squares={[lastMoveFromSquare, lastMoveSquare, selectedSquare]}
-  squareSize={squareSize}
-  getSquarePosition={getSquarePosition}
-/>
+          <LastMoveHighlight
+            squares={[highlightSquares?.from, highlightSquares?.to]}
+            squareSize={squareSize}
+            getSquarePosition={getSquarePosition}
+          />
 
-<LegalDot legalMoves={legalMoves} squareSize={squareSize} />
-          
-  {allSquares.map((square) => (
-  <TouchableOpacity
-  key={`touch-${square}`}
-  style={[
-  styles.square,
-  {
-    width: squareSize,
-    height: squareSize,
-    ...getSquarePosition(square),
-   },
-         ]}
-             onPress={() => handleSquareClick(square)}
+          <LegalDot legalMoves={legalMoves} squareSize={squareSize} />
+
+          {allSquares.map((square) => (
+            <TouchableOpacity
+              key={`touch-${square}`}
+              style={[
+                styles.square,
+                {
+                  width: squareSize,
+                  height: squareSize,
+                  ...getSquarePosition(square),
+                },
+              ]}
+              onPress={() => handleSquareClick(square)}
             />
           ))}
         </View>
 
         <View style={styles.playerRow}>
-  <View style={styles.playerBlock}>
-    <Image source={require('../../assets/wK.png')} style={styles.playerIcon} />
-    <Text style={styles.playerLabel}>{whitePlayer}</Text>
-  </View>
-  {timeControl > 0 && (
-    <View style={styles.timerRight}>
-      <TimerBlock
-  mode="w"
-  activeColor={activeColor}
-  whiteTime={whiteTime}
-  blackTime={blackTime}
-  isRunning={isRunning && activeColor === 'w'}
-  timeControl={timeControl}
-/>
-    </View>
-  )}
-</View>
+          <View style={styles.playerBlock}>
+            <Image source={require('../../assets/wK.png')} style={styles.playerIcon} />
+            <Text style={styles.playerLabel}>{whitePlayer}</Text>
+          </View>
+          {timeControl > 0 && (
+            <View style={styles.timerRight}>
+              <TimerBlock
+                mode="w"
+                activeColor={activeColor}
+                whiteTime={whiteTime}
+                blackTime={blackTime}
+                isRunning={isRunning && activeColor === 'w'}
+                timeControl={timeControl}
+              />
+            </View>
+          )}
+        </View>
 
         {timeControl > 0 && (
           <View style={styles.timerControls}>
@@ -251,10 +259,9 @@ export default function PlayinPersonPage2() {
             <TouchableOpacity onPress={() => setIsRunning(false)} style={styles.controlButton}>
               <Text style={styles.controlText}>Stop</Text>
             </TouchableOpacity>
-                    </View>
+          </View>
         )}
       </View>
     </View>
   );
 }
-       
