@@ -1,5 +1,6 @@
+import { Platform, ToastAndroid } from 'react-native';
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Image, Text, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Image, Text, TouchableOpacity, Dimensions, Alert } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { Chess } from 'chess.js';
 import styles from './playinPersonPage2Styles';
@@ -7,6 +8,13 @@ import { TimerBlock, MoveHistoryPanel } from '../Feature';
 import ChessBoard from '../Chessboard/Chessboard';
 
 const boardSize = Dimensions.get('window').width;
+
+const showTimerAlert = () => {
+  const message = "press start to continue, cutiee.";
+  if (Platform.OS === 'android') {
+    ToastAndroid.show(message, ToastAndroid.SHORT);
+  }
+};
 
 const getPositionMap = (fen) => {
   const rows = fen.split(' ')[0].split('/');
@@ -43,11 +51,13 @@ export default function PlayinPersonPage2() {
   const [moveIndex, setMoveIndex] = useState(-1);
   const [rollbackIndex, setRollbackIndex] = useState(0);
   const [highlightSquares, setHighlightSquares] = useState(null);
-
+  const [showOptions, setShowOptions] = useState(false);
   const [whiteTime, setWhiteTime] = useState(timeControl);
   const [blackTime, setBlackTime] = useState(timeControl);
   const [activeColor, setActiveColor] = useState('w');
   const [isRunning, setIsRunning] = useState(startTimer);
+  const [isBoardTouchable, setBoardTouchable] = useState(startTimer);
+  const [timeLog, setTimeLog] = useState([]);
 
   useEffect(() => {
     if (!isRunning || timeControl === 0) return;
@@ -78,6 +88,10 @@ export default function PlayinPersonPage2() {
   }, [isRunning, activeColor]);
 
   const handleSquareClick = (square) => {
+    if (!isRunning || !isBoardTouchable) {
+  showTimerAlert();
+  return;
+}
     if (!selectedSquare) {
       const moves = game.current.moves({ square, verbose: true });
       if (moves.length > 0) {
@@ -120,7 +134,21 @@ export default function PlayinPersonPage2() {
         to: move.to,
         capture: move.flags.includes('c') ? move.to : null,
       });
+
+      setTimeLog((prev) => [
+        ...prev.slice(0, rollbackIndex),
+        { w: whiteTime, b: blackTime },
+      ]);
     }
+  };
+
+  const syncHighlight = () => {
+    const lastMove = game.current.history({ verbose: true }).slice(-1)[0];
+    setHighlightSquares({
+      from: lastMove?.from || null,
+      to: lastMove?.to || null,
+      capture: lastMove?.flags?.includes('c') ? lastMove.to : null,
+    });
   };
 
   return (
@@ -186,17 +214,109 @@ export default function PlayinPersonPage2() {
           )}
         </View>
 
-        {timeControl > 0 && (
-          <View style={styles.timerControls}>
-            <TouchableOpacity onPress={() => setIsRunning(true)} style={styles.controlButton}>
-              <Text style={styles.controlText}>Start</Text>
+        <View style={styles.controlRow}>
+          <TouchableOpacity style={styles.controlButton} onPress={() => setShowOptions((prev) => !prev)}>
+            <Text style={styles.controlText}>Options</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.controlButton}
+            onPress={() => {
+              const isAtLastMove = moveIndex === moveHistory.length - 1;
+              if (!isRunning && isAtLastMove) {
+                setIsRunning(true);
+                setBoardTouchable(true);
+              } else {
+                setIsRunning(false);
+                setBoardTouchable(false);
+              }
+            }}
+          >
+            <Text style={styles.controlText}>{isRunning ? 'Pause' : 'Start'}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.controlButton}
+            onPress={() => {
+              if (moveIndex >= 0) {
+                const rollback = moveHistory.slice(0, moveIndex);
+                game.current.reset();
+                rollback.forEach((m) => game.current.move(m));
+                setPositionMap(getPositionMap(game.current.fen()));
+                setMoveIndex(moveIndex - 1);
+                setRollbackIndex(moveIndex);
+                setActiveColor(game.current.turn());
+
+                const snapshot = timeLog[moveIndex - 1];
+                if (snapshot) {
+                  setWhiteTime(snapshot.w);
+                  setBlackTime(snapshot.b);
+                }
+
+                syncHighlight();
+                setIsRunning(false);
+                setBoardTouchable(false);
+              }
+            }}
+          >
+            <Text style={styles.controlText}>Back</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.controlButton}
+            onPress={() => {
+              if (moveIndex < moveHistory.length - 1) {
+                game.current.move(moveHistory[moveIndex + 1]);
+                setPositionMap(getPositionMap(game.current.fen()));
+                setMoveIndex(moveIndex + 1);
+                setRollbackIndex(moveIndex + 2);
+                setActiveColor(game.current.turn());
+
+                const snapshot = timeLog[moveIndex + 1];
+                if (snapshot) {
+                  setWhiteTime(snapshot.w);
+                  setBlackTime(snapshot.b);
+                }
+
+                syncHighlight();
+                setIsRunning(false);
+                setBoardTouchable(false);
+              }
+            }}
+          >
+            <Text style={styles.controlText}>Forward</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Inline Options */}
+        {showOptions && (
+          <View style={styles.inlineOptions}>
+            <TouchableOpacity
+              style={styles.optionItem}
+              onPress={() =>
+                Alert.alert('Confirm Draw', 'Offer a draw?', [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Yes', onPress: () => alert('Draw Requested') },
+                ])
+              }
+            >
+              <Text style={styles.controlText}>Draw</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setIsRunning(false)} style={styles.controlButton}>
-              <Text style={styles.controlText}>Stop</Text>
+
+            <TouchableOpacity
+              style={styles.optionItem}
+              onPress={() =>
+                Alert.alert('Confirm Resign', 'Are you sure?', [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Yes', onPress: () => alert('You Resigned') },
+                ])
+              }
+            >
+              <Text style={styles.controlText}>Resign</Text>
             </TouchableOpacity>
           </View>
         )}
       </View>
     </View>
   );
-}
+};

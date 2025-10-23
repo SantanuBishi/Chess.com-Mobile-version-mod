@@ -95,9 +95,31 @@ controlButton: {
   paddingVertical: 8,
   borderRadius: 6,
   marginHorizontal: 8,
+  minWidth: 80,
+  alignItems: 'center',
 },
 controlText: {
   color: '#fff',
   fontWeight: '600',
+},
+controlRow: {
+  flexDirection: 'row',
+  justifyContent: 'center',
+  marginTop: 90,
+  flexWrap: 'wrap',
+},
+
+inlineOptions: {
+  flexDirection: 'row',
+  justifyContent: 'center',
+  marginTop: 8,
+},
+
+optionItem: {
+  backgroundColor: '#333',
+  paddingHorizontal: 12,
+  paddingVertical: 6,
+  borderRadius: 6,
+  marginHorizontal: 6,
 },
 });
