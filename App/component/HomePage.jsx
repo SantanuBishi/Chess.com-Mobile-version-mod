@@ -82,6 +82,7 @@ export default function HomePage() {
             subtext="Learn from masters"
             icon={require('../../assets/nextLesson.png')}
             featureIcon={require('../../assets/Lesson.png')}
+            onPress={()=>navigation.navigate('lessonPage1')}
           />
           <CTAButton
             label="Coach"
