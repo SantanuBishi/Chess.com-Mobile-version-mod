@@ -8,7 +8,7 @@ const LessonPage2 = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { tierId, courseId } = route.params;
-
+    
   // ✅ Find selected course
   const selectedTier = lessonTiers.find((tier) => tier.id === tierId);
   const selectedCourse = selectedTier?.courses.find((course) => course.id === courseId);
@@ -31,7 +31,7 @@ const LessonPage2 = () => {
           key={lesson.id}
           style={styles.lessonButton}
           onPress={() =>
-            navigation.navigate('LessonBoard', {
+            navigation.navigate('lessonPage3', {
               tierId,
               courseId,
               lessonId: lesson.id,

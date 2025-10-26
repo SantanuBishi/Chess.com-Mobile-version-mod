@@ -7,6 +7,7 @@ import  PlayinPersonPage1  from "./src/PlayFriend/playinPersonPage1";
 import  PlayinPersonPage2 from "./src/PlayFriend/playinPersonPage2";
 import  LessonPage1  from "./src/lessons/lessonPage1";
 import LessonPage2 from './src/lessons/lessonPage2';
+import LessonPage3 from './src/lessons/lessonPage3';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -19,6 +20,8 @@ export default function App() {
          <Stack.Screen name="playinPersonPage2" component={PlayinPersonPage2} />
           <Stack.Screen name="lessonPage1" component={LessonPage1} />
           <Stack.Screen name="lessonPage2" component={LessonPage2} />
+          <Stack.Screen name="lessonPage3" component={LessonPage3} />
+
 
       </Stack.Navigator>
     </NavigationContainer>
