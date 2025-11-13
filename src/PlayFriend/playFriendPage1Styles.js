@@ -6,7 +6,7 @@ export default StyleSheet.create({
     padding: 24,
     backgroundColor: '#121212',
     alignItems: 'center',
-    gap: 20, // React Native now supports gap in latest versions
+    gap: 20,
   },
   title: {
     fontSize: 22,

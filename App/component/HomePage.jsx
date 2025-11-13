@@ -1,7 +1,8 @@
 import React from 'react';
 import {  View,  Text,  ScrollView,  TouchableOpacity,  Image,} from 'react-native';
 import styles from './Styles/HomePageStyles';
-import NavBar from './NavBar';import { useNavigation } from '@react-navigation/native';
+import NavBar from './NavBar';
+import { useNavigation } from '@react-navigation/native';
 
 
 
@@ -70,6 +71,7 @@ export default function HomePage() {
             subtext="Challenge any level"
             icon={require('../../assets/playABot.png')}
             featureIcon={require('../../assets/Bot.png')}
+            onPress={()=>navigation.navigate('playBotPage1')}
           />
           <CTAButton
             label="New Puzzle"
